@@ -80,6 +80,19 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(Exception.class)
+    ResponseEntity<ApiErrorResponse> handleUnexpected(
+            Exception ex,
+            HttpServletRequest request) {
+
+        return build(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "Unexpected error",
+                request.getRequestURI(),
+                List.of()
+        );
+    }
+
     private ResponseEntity<ApiErrorResponse> build(
             HttpStatus status,
             String message,

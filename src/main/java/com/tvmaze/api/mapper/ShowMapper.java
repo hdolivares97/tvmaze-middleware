@@ -12,6 +12,13 @@ import java.util.Map;
 @Component
 public class ShowMapper {
 
+    /**
+     * Maps TVMaze show data and its comments to the search response.
+     *
+     * @param show TVMaze show data
+     * @param comments comments associated with the show
+     * @return mapped search show response
+     */
     public SearchShowResponse toSearchResponse(Map<String, Object> show,
     List<CommentDocument> comments) {
         return new SearchShowResponse(
@@ -24,6 +31,12 @@ public class ShowMapper {
         );
     }
 
+    /**
+     * Maps comment documents to comment response objects.
+     *
+     * @param comments comment documents associated with a show
+     * @return mapped comment responses
+     */
     public List<CommentResponse> toComments(List<CommentDocument> comments) {
         return comments.stream()
                 .map(comment -> new CommentResponse(

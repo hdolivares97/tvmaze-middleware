@@ -21,6 +21,12 @@ public class CommentController {
 
     private final CommentService commentService;
 
+    /**
+     * Adds a comment and rating to a show.
+     *
+     * @param request comment information
+     * @return HTTP 201 when the comment is created
+     */
     @PostMapping("/comments")
     public ResponseEntity<StatusResponse> addComment(
             @Valid @RequestBody CommentRequest request) {

@@ -18,6 +18,9 @@ public class TvMazeClient {
 
     private final RestClient tvMazeRestClient;
 
+    /**
+     * Searches shows in TVMaze using the provided query.
+     */
     public List<Map<String, Object>> searchShows(String query) {
         try {
             List<Map<String, Object>> response = tvMazeRestClient.get()
@@ -38,6 +41,12 @@ public class TvMazeClient {
         }
     }
 
+    /**
+     * Retrieves a show by ID from TVMaze.
+     *
+     * @throws ShowNotFoundException if the show does not exist
+     * @throws ExternalServiceException if TVMaze cannot process the request
+     */
     public Map<String, Object> getShow(Long showId) {
         try {
             Map<String, Object> response = tvMazeRestClient.get()

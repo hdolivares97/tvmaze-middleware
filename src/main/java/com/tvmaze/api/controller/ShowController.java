@@ -20,12 +20,24 @@ public class ShowController {
 
     private final ShowService showService;
 
+    /**
+     * Searches shows by the provided search criteria.
+     *
+     * @param searchQuery search criteria
+     * @return shows matching the search criteria
+     */
     @GetMapping("/search")
     public ResponseEntity<List<SearchShowResponse>> search(
             @RequestParam("search_query") @NotBlank String searchQuery) {
         return ResponseEntity.ok(showService.search(searchQuery));
     }
 
+    /**
+     * Retrieves a show by its identifier.
+     *
+     * @param showId show identifier
+     * @return complete show information including comments
+     */
     @GetMapping("/{showId}")
     public ResponseEntity<Map<String, Object>> getShow(@PathVariable @Positive Long showId) {
         return ResponseEntity.ok(showService.getShow(showId));
