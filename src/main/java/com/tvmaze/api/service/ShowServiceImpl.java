@@ -1,14 +1,18 @@
 package com.tvmaze.api.service;
 
 import com.tvmaze.api.client.TvMazeClient;
+import com.tvmaze.api.document.ShowCacheDocument;
 import com.tvmaze.api.dto.SearchShowResponse;
 import com.tvmaze.api.mapper.ShowMapper;
+import com.tvmaze.api.repository.ShowCacheRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +21,7 @@ public class ShowServiceImpl implements ShowService {
 
     private final TvMazeClient tvMazeClient;
     private final ShowMapper showMapper;
+    private final ShowCacheRepository showCacheRepository;
 
     @Override
     public List<SearchShowResponse> search(String searchQuery) {
@@ -37,11 +42,28 @@ public class ShowServiceImpl implements ShowService {
     @Override
     public Map<String, Object> getShow(Long showId) {
 
-        log.info("Retrieving show with id={}", showId);
+        Optional<ShowCacheDocument> cachedShow =
+                showCacheRepository.findById(showId);
+
+        if (cachedShow.isPresent()) {
+            log.info("Show {} retrieved from MongoDB cache", showId);
+            return cachedShow.get().getPayload();
+        }
+
+        log.info("Show {} not found in MongoDB cache. Calling TVMaze API",
+                showId);
 
         Map<String, Object> show = tvMazeClient.getShow(showId);
 
-        log.info("Show retrieved successfully. id={}", showId);
+        showCacheRepository.save(
+                ShowCacheDocument.builder()
+                        .id(showId)
+                        .payload(show)
+                        .cachedAt(Instant.now())
+                        .build()
+        );
+
+        log.info("Show {} cached successfully in MongoDB", showId);
 
         return show;
     }
