@@ -1,9 +1,11 @@
 package com.tvmaze.api.service;
 
 import com.tvmaze.api.client.TvMazeClient;
+import com.tvmaze.api.document.CommentDocument;
 import com.tvmaze.api.document.ShowCacheDocument;
 import com.tvmaze.api.dto.SearchShowResponse;
 import com.tvmaze.api.mapper.ShowMapper;
+import com.tvmaze.api.repository.CommentRepository;
 import com.tvmaze.api.repository.ShowCacheRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,19 +24,31 @@ public class ShowServiceImpl implements ShowService {
     private final TvMazeClient tvMazeClient;
     private final ShowMapper showMapper;
     private final ShowCacheRepository showCacheRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public List<SearchShowResponse> search(String searchQuery) {
 
         log.info("Searching shows with query={}", searchQuery);
 
-        List<SearchShowResponse> shows = tvMazeClient.searchShows(searchQuery).stream()
+        List<SearchShowResponse> shows = tvMazeClient.searchShows(searchQuery)
+                .stream()
                 .map(this::extractShow)
-                .map(showMapper::toSearchResponse)
+                .map(show -> {
+                    Long showId = ((Number) show.get("id")).longValue();
+
+                    List<CommentDocument> comments =
+                            commentRepository.findByShowIdOrderByCreatedAtAsc(showId);
+
+                    return showMapper.toSearchResponse(show, comments);
+                })
                 .toList();
 
-        log.info("Show search completed successfully. query={}, results={}",
-                searchQuery, shows.size());
+        log.info(
+                "Show search completed successfully. query={}, results={}",
+                searchQuery,
+                shows.size()
+        );
 
         return shows;
     }

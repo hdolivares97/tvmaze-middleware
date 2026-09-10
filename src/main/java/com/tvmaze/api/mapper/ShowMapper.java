@@ -1,5 +1,7 @@
 package com.tvmaze.api.mapper;
 
+import com.tvmaze.api.document.CommentDocument;
+import com.tvmaze.api.dto.CommentResponse;
 import com.tvmaze.api.dto.SearchShowResponse;
 import org.springframework.stereotype.Component;
 
@@ -10,14 +12,25 @@ import java.util.Map;
 @Component
 public class ShowMapper {
 
-    public SearchShowResponse toSearchResponse(Map<String, Object> show) {
+    public SearchShowResponse toSearchResponse(Map<String, Object> show,
+    List<CommentDocument> comments) {
         return new SearchShowResponse(
                 toLong(show.get("id")),
                 asString(show.get("name")),
                 resolveChannel(show),
                 asString(show.get("summary")),
-                toStringList(show.get("genres"))
+                toStringList(show.get("genres")),
+                toComments(comments)
         );
+    }
+
+    public List<CommentResponse> toComments(List<CommentDocument> comments) {
+        return comments.stream()
+                .map(comment -> new CommentResponse(
+                        comment.getComment(),
+                        comment.getRating()
+                ))
+                .toList();
     }
 
     private String resolveChannel(Map<String, Object> show) {
