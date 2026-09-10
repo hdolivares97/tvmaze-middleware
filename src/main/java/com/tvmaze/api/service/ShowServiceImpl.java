@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,27 +60,39 @@ public class ShowServiceImpl implements ShowService {
         Optional<ShowCacheDocument> cachedShow =
                 showCacheRepository.findById(showId);
 
+        Map<String, Object> show;
+
         if (cachedShow.isPresent()) {
             log.info("Show {} retrieved from MongoDB cache", showId);
-            return cachedShow.get().getPayload();
+            show = cachedShow.get().getPayload();
+        } else {
+            log.info("Show {} not found in MongoDB cache. Calling TVMaze API",
+                    showId);
+
+            show = tvMazeClient.getShow(showId);
+
+            showCacheRepository.save(
+                    ShowCacheDocument.builder()
+                            .id(showId)
+                            .payload(show)
+                            .cachedAt(Instant.now())
+                            .build()
+            );
+
+            log.info("Show {} cached successfully in MongoDB", showId);
         }
 
-        log.info("Show {} not found in MongoDB cache. Calling TVMaze API",
-                showId);
+        List<CommentDocument> comments =
+                commentRepository.findByShowIdOrderByCreatedAtAsc(showId);
 
-        Map<String, Object> show = tvMazeClient.getShow(showId);
+        Map<String, Object> response = new LinkedHashMap<>(show);
 
-        showCacheRepository.save(
-                ShowCacheDocument.builder()
-                        .id(showId)
-                        .payload(show)
-                        .cachedAt(Instant.now())
-                        .build()
+        response.put(
+                "comments",
+                showMapper.toComments(comments)
         );
 
-        log.info("Show {} cached successfully in MongoDB", showId);
-
-        return show;
+        return response;
     }
 
     @SuppressWarnings("unchecked")
