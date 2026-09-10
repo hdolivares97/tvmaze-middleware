@@ -34,6 +34,18 @@ public class ShowServiceImpl implements ShowService {
         return shows;
     }
 
+    @Override
+    public Map<String, Object> getShow(Long showId) {
+
+        log.info("Retrieving show with id={}", showId);
+
+        Map<String, Object> show = tvMazeClient.getShow(showId);
+
+        log.info("Show retrieved successfully. id={}", showId);
+
+        return show;
+    }
+
     @SuppressWarnings("unchecked")
     private Map<String, Object> extractShow(Map<String, Object> searchItem) {
         Object show = searchItem.get("show");
