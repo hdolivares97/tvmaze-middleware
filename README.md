@@ -19,23 +19,20 @@ The application provides show search and detail endpoints, MongoDB caching, and 
 
 - Java 17+
 - Maven
-- MongoDB Atlas database
 
 ## Configuration
 
-The application requires the following environment variable:
+The application is configured to use the MongoDB Atlas instance created specifically for this technical assessment.
 
-```bash
-MONGODB_URI=<your-mongodb-connection-string>
-```
+The MongoDB connection configuration is included in `application.properties` as part of the assessment setup, allowing the project to be cloned and executed without requiring additional database configuration.
 
-TVMaze base URL is configured in `application.properties`:
+Application configuration is defined in `application.properties`:
 
 ```properties
 spring.application.name=${APP_NAME:tvmaze-middleware-api}
 server.port=${SERVER_PORT:8080}
 tvmaze.base-url=${TVMAZE_BASE_URL:https://api.tvmaze.com}
-spring.data.mongodb.uri=${MONGODB_URI}
+spring.data.mongodb.uri=${MONGODB_URI:mongodb+srv://usuario:password@cluster.mongodb.net/tvmaze}
 ```
 
 ## Run
